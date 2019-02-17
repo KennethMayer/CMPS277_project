@@ -5,21 +5,21 @@
 
 ## NOTE: API listing is in the project documentation on google docs
 
-from src import database
+from database import database
 
 class transaction_manager:
 	# initialize an empty database
 	def __init__(self):
-		self.database = database(); #instance of the database object
-		self.transactions = []; #ordered list of the uncommitted transactions
+		self.database = database(); # instance of the database object
+		self.transactions = []; # ordered list of the uncommitted transactions (not used at this moment)
 		self.function_names = { ## POTENTIAL PROBLEM: may need to define the functions before putting them in the dictionary, not sure in the case of a class
-			"add_book": add_book,
-			"check_book": check_book,
-			"buy_book": buy_book,
-			"remove_book": remove_book,
-			"begin": begin, # implement later
-			"commit": commit, # implement later
-			"abort": abort # implement later
+			"add_book": self.add_book,
+			"check_book": self.check_book,
+			"buy_book": self.buy_book,
+			"remove_book": self.remove_book,
+			#"begin": self.begin, # implement later
+			#"commit": self.commit, # implement later
+			#"abort": self.abort # implement later
 		}
 		
 	# run a command and return the result
@@ -29,7 +29,7 @@ class transaction_manager:
 		tokens = command.split(' ')
 		function = tokens[0]
 		if function in self.function_names:
-			return self.function(tokens[1:])
+			return self.function_names[function](tokens[1:])
 		return 'Error: invalid command'
 	
 	# for all API functions:
@@ -39,12 +39,13 @@ class transaction_manager:
 	# args = string isbn, string owner, int price
 	def add_book(self, args):
 		if len(args) != 3:
-			return 'add_book: usage: add_book isbn owner price'
+			return 'add_book: usage: add_book [ISBN] [owner] [price]'
 		try:
 			int(args[2])
 		except ValueError:
-			return 'add_book: price argument must be an integer'
-		if listings = database.read(args[0]) != False: # key already exists in the database
+			return 'add_book price argument must be an integer'
+		listings = database.read(args[0])
+		if listings != False: # key already exists in the database
 			listings.append((args[1], args[2]))
 		else:
 			listings = (args[1], args[2])
@@ -55,37 +56,54 @@ class transaction_manager:
 	
 	# args = string isbn
 	def check_book(self, args):
-		if len(args) != 1
-			return 'check_book: usage: check_book isbn'
-		if listings = database.read(args[0]) != False:
+		if len(args) != 1:
+			return 'check_book usage: check_book [ISBN]'
+		listings = database.read(args[0])
+		if listings != False:
 			return 'Found the following listings: {}'.format(listings)
-		else
+		else:
 			return 'Couldn\'t find any listings associated with that ISBN.'
 	
 	# args = string isbn, string owner, int balance
 	def buy_book(self, args):
-		if len(args) != 2
-			return 'buy_book: usage: buy_book ISBN balance'
-		try
+		if len(args) != 3:
+			return 'buy_book: usage: buy_book [ISBN] [owner] [balance]'
+		try:
 			balance = int(args[2])
 		except ValueError:
-			return 'buy_book: balance argument must be an integer'
-		if listings = database.read(args[0]) != False:
+			return 'buy_book balance argument must be an integer'
+		listings = database.read(args[0])
+		if listings != False:
 			# now that we have the vector, we need to check if the specified owner is in it
-			for owner, price in enumerate(listings):
-				if owner == args[1]:
-					if balance >= price:
-						listings.remove((owner, price))
+			for pair in listings:
+				if pair[0] == args[1]:
+					if balance >= pair[1]:
+						listings.remove(pair)
 						if database.write(args[0], listings) != False:
-							return 'Bought book {} from {} for {}.'.format(args[0], owner, price)
+							return 'Bought book {} from {} for {}.'.format(args[0], pair[0], pair[1])
 						else:
 							return 'Listing exists, but write operation failed.'
 					else:
-						return 'Book costs {}, but you only have {}.'.format(price, balance)
+						return 'Book costs {}, but you only have {}.'.format(pair[1], balance)
 			return 'Could not find a listing for book {} by owner {}.'.format(args[0], args[1])
 		else:
 			return 'Could not find any listing for book {}.'.format(args[0])
 					
 	# args = string isbn, string caller
 	def remove_book(self, args):
+		if len(args) != 2:
+			return 'remove_book usage: remove_book [ISBN] [caller]'
+		listings = database.read(args[0])
+		if listings != False:
+			# now that we have the vector , we need check if the person calling the function is in it
+			for pair in listings:
+				if pair[0] == args[1]:
+					listings.remove(pair)
+					if database.write(args[0], listings) != False:
+						return 'Removed book {} from listings.'.format(args[0])
+					else:
+						return 'You own the book, but write operation failed.'
+			return 'Could not find a listing for book {} by owner {}.'.format(args[0], args[1])
+		else:
+			return 'Could not find any listing for book {}.'.format(args[0])
 	
