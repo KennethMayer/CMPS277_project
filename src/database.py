@@ -4,8 +4,8 @@ class database:
 	def __init__(self):
 		self.datastore = {}
 	
-	def read(isbn):
+	def read(self, isbn):
 		return [('krmayer', 18)] # hardcoded for tests
 		
-	def write(isbn, listings):
+	def write(self, isbn, listings):
 		return True
