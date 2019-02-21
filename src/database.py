@@ -5,7 +5,12 @@ class database:
 		self.datastore = {}
 	
 	def read(self, isbn):
-		return [('krmayer', 18)] # hardcoded for tests
-		
+		if isbn in self.datastore:
+			if len(self.datastore[isbn]) == 0:
+				return False
+			return self.datastore[isbn]
+		return False
+			
 	def write(self, isbn, listings):
+		self.datastore[isbn] = listings;
 		return True

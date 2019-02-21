@@ -44,12 +44,16 @@ class transaction_manager:
 			int(args[2])
 		except ValueError:
 			return 'add_book price argument must be an integer'
-		listings = database.read(args[0])
+		listings = self.database.read(args[0])
+		try:
+			price = int(args[2])
+		except ValueError:
+			return 'add_book: price argument must be an integer'
 		if listings != False: # key already exists in the database
-			listings.append((args[1], args[2]))
+			listings.append((args[1], price))
 		else:
-			listings = (args[1], args[2])
-		if database.write(args[0], listings) != False:
+			listings = [(args[1], price)]
+		if self.database.write(args[0], listings) != False:
 			return 'add_book: successfully added book {} under {}\'s name at price {}.'.format(args[0], args[1], args[2])
 		else:
 			return 'Couldn\'t write new value to database.'
@@ -58,7 +62,7 @@ class transaction_manager:
 	def check_book(self, args):
 		if len(args) != 1:
 			return 'check_book usage: check_book [ISBN]'
-		listings = database.read(args[0])
+		listings = self.database.read(args[0])
 		if listings != False:
 			return 'Found the following listings: {}'.format(listings)
 		else:
@@ -71,15 +75,15 @@ class transaction_manager:
 		try:
 			balance = int(args[2])
 		except ValueError:
-			return 'buy_book balance argument must be an integer'
-		listings = database.read(args[0])
+			return 'buy_book: balance argument must be an integer'
+		listings = self.database.read(args[0])
 		if listings != False:
 			# now that we have the vector, we need to check if the specified owner is in it
 			for pair in listings:
 				if pair[0] == args[1]:
 					if balance >= pair[1]:
 						listings.remove(pair)
-						if database.write(args[0], listings) != False:
+						if self.database.write(args[0], listings) != False:
 							return 'Bought book {} from {} for {}.'.format(args[0], pair[0], pair[1])
 						else:
 							return 'Listing exists, but write operation failed.'
@@ -93,14 +97,14 @@ class transaction_manager:
 	def remove_book(self, args):
 		if len(args) != 2:
 			return 'remove_book usage: remove_book [ISBN] [caller]'
-		listings = database.read(args[0])
+		listings = self.database.read(args[0])
 		if listings != False:
 			# now that we have the vector , we need check if the person calling the function is in it
 			for pair in listings:
 				if pair[0] == args[1]:
 					listings.remove(pair)
-					if database.write(args[0], listings) != False:
-						return 'Removed book {} from listings.'.format(args[0])
+					if self.database.write(args[0], listings) != False:
+						return 'Removed book {} owned by {} from listings.'.format(args[0], args[1])
 					else:
 						return 'You own the book, but write operation failed.'
 			return 'Could not find a listing for book {} by owner {}.'.format(args[0], args[1])

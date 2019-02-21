@@ -24,7 +24,7 @@ class shell:
 	
 	def help_command(self):
 		print('List of command usages:')
-		print('buy_book [ISBN] [owner] [price]')
+		print('add_book [ISBN] [owner] [price]')
 		print('check_book [ISBN]')
 		print('buy_book [ISBN] [owner] [balance]')
 		print('remove_book [ISBN] [caller]')
