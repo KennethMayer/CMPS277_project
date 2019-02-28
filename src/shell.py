@@ -28,6 +28,9 @@ class shell:
 		print('check_book [ISBN]')
 		print('buy_book [ISBN] [owner] [balance]')
 		print('remove_book [ISBN] [caller]')
+		print('begin')
+		print('commit')
+		print('abort')
 		print('quit')
 		print('help')
 		
