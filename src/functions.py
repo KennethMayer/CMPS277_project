@@ -8,13 +8,13 @@ from database import CachingDatabaseWrapper, Transaction
 
 class Functions:
 	def __init__(self):
-		self.function_names = { 
+		self.function_names = {
 			"add_book": self.add_book,
-			#"check_book": self.check_book,
-			#"buy_book": self.buy_book,
-			#"remove_book": self.remove_book
+			"check_book": self.check_book,
+			"buy_book": self.buy_book,
+			"remove_book": self.remove_book
 		}
-		
+
 	# run a command and return the result
 	# @arg1: self
 	# @arg2: a string that represents a shell command
@@ -24,11 +24,10 @@ class Functions:
 		if function in self.function_names:
 			return self.function_names[function](command[1:])
 		return 'Error: invalid commandf'
-	
+
 	# for all API functions:
 	# @arg1: self
 	# @arg2: argument list for the function
-	
 	# args = string isbn, string owner, int price
 	def add_book(self, args):
 		if len(args) != 3:
@@ -40,67 +39,80 @@ class Functions:
 		def txn(db: CachingDatabaseWrapper):
 			listings = db.read(args[0])
 			if listings != False: # key already exists in the database
+				price = int(args[2])
 				listings.append((args[1], price))
+				db.write(args[0],listings)
+				print('add_book: successfully updated book {} under {}\'s name at price {}.'.format(args[0],args[1],args[2]))
 			else:
 				price = int(args[2])
 				listings = [(args[1], price)]
-			db.write(args[0], listings)
-			print ('add_book: successfully added book {} under {}\'s name at price {}.'.format(args[0], args[1], args[2]))
+				db.write(args[0], listings)
+				print ('add_book: successfully added book {} under {}\'s name at price {}.'.format(args[0], args[1], args[2]))
 
 		return txn
-
-"""
 
 	# args = string isbn
 	def check_book(self, args):
 		if len(args) != 1:
-			print 'check_book usage: check_book [ISBN]'
-		listings = db.read(args[0])
-		if listings != False:
-			return 'Found the following listings: {}'.format(listings)
-		else:
-			return 'Couldn\'t find any listings associated with that ISBN.'
-	
+			print ('check_book usage: check_book [ISBN]')
+		def txn(db: CachingDatabaseWrapper):
+			listings = db.read(args[0])
+			if listings != False:
+				print('Found the following listings: {}'.format(listings))
+			else:
+				print('Couldn\'t find any listings associated with that ISBN.')
+		return txn
+
 	# args = string isbn, string owner, int balance
 	def buy_book(self, args):
+		found = False
 		if len(args) != 3:
-			return 'buy_book: usage: buy_book [ISBN] [owner] [balance]'
+			print('buy_book: usage: buy_book [ISBN] [owner] [balance]')
 		try:
 			balance = int(args[2])
 		except ValueError:
-			return 'buy_book: balance argument must be an integer'
-		listings = self.database.read(args[0])
-		if listings != False:
-			# now that we have the vector, we need to check if the specified owner is in it
-			for pair in listings:
-				if pair[0] == args[1]:
-					if balance >= pair[1]:
-						listings.remove(pair)
-						if self.database.write(args[0], listings) != False:
-							return 'Bought book {} from {} for {}.'.format(args[0], pair[0], pair[1])
+			print('buy_book: balance argument must be an integer')
+		def txn(db: CachingDatabaseWrapper):
+			listings = db.read(args[0])
+			if listings != False:
+				# now that we have the vector, we need to check if the specified owner is in it
+				for pair in listings:
+					if pair[0] == args[1]:
+						balance = int(args[2])
+						price = int(pair[1])
+						found = True
+						if balance >= price:
+							listings.remove(pair)
+							db.write(args[0], listings)
+							print('Bought book {} from {} for {}.'.format(args[0], pair[0], pair[1]))
+							break
 						else:
-							return 'Listing exists, but write operation failed.'
-					else:
-						return 'Book costs {}, but you only have {}.'.format(pair[1], balance)
-			return 'Could not find a listing for book {} by owner {}.'.format(args[0], args[1])
-		else:
-			return 'Could not find any listing for book {}.'.format(args[0])
-					
+							print('Book costs {}, but you only have {}.'.format(pair[1], balance))
+							break
+			if (not found):
+				print('Could not find any listing for book {}.'.format(args[0]))
+
+			return txn
+
 	# args = string isbn, string caller
 	def remove_book(self, args):
+		found = False
 		if len(args) != 2:
-			return 'remove_book usage: remove_book [ISBN] [caller]'
-		listings = self.database.read(args[0])
-		if listings != False:
-			# now that we have the vector , we need to check if the person calling the function is in it
-			for pair in listings:
-				if pair[0] == args[1]:
-					listings.remove(pair)
-					if self.database.write(args[0], listings) != False:
-						return 'Removed book {} owned by {} from listings.'.format(args[0], args[1])
-					else:
-						return 'You own the book, but write operation failed.'
-			return 'Could not find a listing for book {} by owner {}.'.format(args[0], args[1])
-		else:
-			return 'Could not find any listing for book {}.'.format(args[0])
-"""
+			print('remove_book usage: remove_book [ISBN] [caller]')
+		def txn(db: CachingDatabaseWrapper):
+			listings = db.read(args[0])
+			if listings != False:
+				# now that we have the vector, we need to check if the person calling the function is in it
+				for pair in listings:
+					if pair[0] == args[1]:
+						found = True
+						listings.remove(pair)
+						db.write(args[0], listings)
+						print('Removed book {} owned by {} from listings.'.format(args[0], args[1]))
+						break	
+				if(not found):
+					print('Could not find a listing for book {} by owner {}.'.format(args[0], args[1]))
+			else:
+				print('Could not find any listing for book {}.'.format(args[0]))
+
+		return txn

@@ -6,7 +6,8 @@ class shell:
 		self.tm = transaction_manager()
 
 	def run(self):
-		print('Welcome to the bookstore database shell. For a list of commands you can run, type \'help\'.')
+		print('Welcome to the bookstore database shell.')
+		print('For a list of commands you can run, type \'help\'.')
 		command = ''
 		while(True):
 			command = sys.stdin.readline()
@@ -21,7 +22,7 @@ class shell:
 	def exit_command(self):
 		print('Bye!')
 		exit();
-	
+
 	def help_command(self):
 		print('List of command usages:')
 		print('begin add_book [ISBN] [owner] [price]')
@@ -32,9 +33,9 @@ class shell:
 		print('abort [transaction_id]')
 		print('quit')
 		print('help')
-		
+
 def main():
 	sh = shell()
 	sh.run();
-	
+
 main()

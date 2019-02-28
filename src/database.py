@@ -14,13 +14,13 @@ class Database:
 
     def write(self, name: str, val: Any) -> None:
         self.data[name] = val
+        print('dbwrite: ', name, self.data[name])
 
     def read(self, name: str) -> Any:
         if name in self.data:
             return self.data[name]
         else:
             return False
-	
 
 class CachingDatabaseWrapper:
     """
@@ -39,16 +39,18 @@ class CachingDatabaseWrapper:
 
     def read(self, name: str) -> Any:
         self.read_set.add(name)
-        if name in self.copies:
-            return self.copies[name]
-        else:
-            return self.db.read(name)
+        print('readset: ', self.read_set)
+        #if name in self.copies:
+         #   return self.copies[name]
+        #else:
+        return self.db.read(name)
 
     def commit(self) -> None:
         for k, v in self.copies.items():
             self.db.write(k, v)
 
     def get_write_set(self) -> Set[str]:
+        print (set(self.copies.keys()))
         return set(self.copies.keys())
 
     def get_read_set(self) -> Set[str]:
