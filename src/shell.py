@@ -24,13 +24,12 @@ class shell:
 	
 	def help_command(self):
 		print('List of command usages:')
-		print('add_book [ISBN] [owner] [price]')
-		print('check_book [ISBN]')
-		print('buy_book [ISBN] [owner] [balance]')
-		print('remove_book [ISBN] [caller]')
-		print('begin')
-		print('commit')
-		print('abort')
+		print('begin add_book [ISBN] [owner] [price]')
+		print('begin check_book [ISBN]')
+		print('begin buy_book [ISBN] [owner] [balance]')
+		print('begin remove_book [ISBN] [caller]')
+		print('commit [transaction_id]')
+		print('abort [transaction_id]')
 		print('quit')
 		print('help')
 		
