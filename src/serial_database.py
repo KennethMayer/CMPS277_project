@@ -1,3 +1,7 @@
+## transaction_manager.py
+## Kenneth Mayer and Muhammad Saber
+## Implements a serial transaction executor with optimal concurrency control for our simple distributed bookstore system.
+
 from typing import Callable, Dict, List
 
 from database import CachingDatabaseWrapper, Database, Optional, Transaction

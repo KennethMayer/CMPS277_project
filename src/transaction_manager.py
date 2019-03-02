@@ -19,7 +19,7 @@ class transaction_manager:
 		self.function_names = {
 			"begin": self.begin,
 			"commit": self.commit,
-			"abort": self.abort
+			"abort": self.abort,
 		}
 		
 	# run a command and return the result
@@ -38,8 +38,36 @@ class transaction_manager:
 	
 	# args = string command
 	def begin(self,args):
-		if len(args) <= 1:
-			print('begin usage: begin command')
+		if len(args) == 0:
+			return'begin usage: begin command'
+		# command error checking
+		if(args[0] == 'add_book'):
+			if len(args) != 4:
+				return 'add_book: usage: add_book [ISBN] [owner] [price]'
+			try:
+				price = int(args[3])
+			except ValueError:
+				return 'add_book price argument must be an integer'
+
+		elif(args[0] == 'check_book'):
+			if len(args) != 2:
+				return 'check_book usage: check_book [ISBN]'
+
+		elif(args[0] == 'buy_book'):
+			if len(args) != 4:
+				return 'buy_book: usage: buy_book [ISBN] [owner] [balance]'
+			try:
+				balance = int(args[3])
+			except ValueError:
+				return 'buy_book: balance argument must be an integer'
+
+		elif(args[0] == 'remove_book'):
+			if len(args) != 3:
+				return 'remove_book usage: remove_book [ISBN] [caller]'
+
+		else:
+			return'Error: invalid command'
+
 		self.i = self.i + 1
 		tid = 't' + str(self.i)
 		print('Transaction \'', tid, '\' started.')
@@ -71,3 +99,16 @@ class transaction_manager:
 			print('Transaction', arg[0], ' aborted')
 		else:
 			print('Error: invalid transaction ID')
+
+"""
+        # args = string isbn
+        def check_book(self, args):
+                if len(args) != 1:
+                        return 'check_book usage: check_book [ISBN]'
+		else:
+	                listings = self.db.read(args[0])
+                        if listings != False:
+				return 'Found the following listings: {}'.format(listings)
+                        else:
+                                return 'Couldn\'t find any listings associated with that ISBN.'
+"""
