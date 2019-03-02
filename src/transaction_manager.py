@@ -20,6 +20,7 @@ class transaction_manager:
 			"begin": self.begin,
 			"commit": self.commit,
 			"abort": self.abort,
+			"check_book": self.check_book
 		}
 		
 	# run a command and return the result
@@ -66,7 +67,7 @@ class transaction_manager:
 				return 'remove_book usage: remove_book [ISBN] [caller]'
 
 		else:
-			return'Error: invalid command'
+			return 'Error: invalid command'
 
 		self.i = self.i + 1
 		tid = 't' + str(self.i)
@@ -78,14 +79,15 @@ class transaction_manager:
 	# arg = string transaction_id
 	def commit(self,arg):
 		if len(arg) != 1:
-			print('commit usage: commit [transaction_id]')
+			return 'commit usage: commit [transaction_id]'
 		if arg[0] in self.transactions:
+			#self.transactions[arg[0]].read_phase()
 			status = self.transactions[arg[0]].validate_and_write_phase()
 			if status:
 				print('Transaction ', arg[0], ' successfully comitted')
 				self.transactions.pop(arg[0])
 			else:
-				print('Error: unable to commit ', arg[0], ', aborting instead.')
+				print('Conflict: unable to commit ', arg[0], ', aborting instead.')
 				self.transactions.pop(arg[0])
 		else:
 			print('Error: invalid transaction ID')
@@ -93,22 +95,22 @@ class transaction_manager:
 	# arg = string transaction_id
 	def abort(self, arg):
 		if len(arg) != 1:
-			print('abort usage: abort [transaction_id]')
+			return 'abort usage: abort [transaction_id]'
 		if arg[0] in self.transactions:
 			self.transactions.pop(arg[0])
 			print('Transaction', arg[0], ' aborted')
 		else:
 			print('Error: invalid transaction ID')
 
-"""
+
         # args = string isbn
-        def check_book(self, args):
-                if len(args) != 1:
-                        return 'check_book usage: check_book [ISBN]'
+	def check_book(self, args):
+		if len(args) != 1:
+			return 'check_book usage: check_book [ISBN]'
 		else:
-	                listings = self.db.read(args[0])
-                        if listings != False:
+			listings = self.db.read(args[0])
+			if listings != False:
 				return 'Found the following listings: {}'.format(listings)
-                        else:
-                                return 'Couldn\'t find any listings associated with that ISBN.'
-"""
+			else:
+				return 'Couldn\'t find any listings associated with that ISBN.'
+

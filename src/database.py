@@ -2,6 +2,7 @@
 ## Kenneth Mayer and Muhammad Saber
 ## Implements the backend database for our simple distributed bookstore system.
 
+from copy import copy
 from typing import Any, Dict, Optional, Set, Callable
 
 class Database:
@@ -22,7 +23,9 @@ class Database:
 
     def read(self, name: str) -> Any:
         if name in self.data:
-            return self.data[name]
+            #print('dread:', name, self.data[name])
+            val = copy(self.data[name])
+            return val
         else:
             return False
 
@@ -39,15 +42,17 @@ class CachingDatabaseWrapper:
         self.read_set: Set[str] = set()
 
     def write(self, name: str, val: Any) -> None:
+        print('cwrite: ',name,val)
         self.copies[name] = val
 
     def read(self, name: str) -> Any:
         self.read_set.add(name)
         #print('readset: ', self.read_set)
-        #if name in self.copies:
-        #   return self.copies[name]
-        #else:
-        return self.db.read(name)
+        if name in self.copies:
+            #print('cread:', name)
+            return self.copies[name]
+        else:
+            return self.db.read(name)
 
     def commit(self) -> None:
         for k, v in self.copies.items():

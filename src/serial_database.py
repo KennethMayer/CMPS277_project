@@ -25,6 +25,7 @@ class SerialTransactionExecutor:
             if not write_set.isdisjoint(read_set):
                 return False
         self.db._commit_transaction(self.cached_db)
+        #print('committed')
         return True
 
 class SerialDatabase(Database):
