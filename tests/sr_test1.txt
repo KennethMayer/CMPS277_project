@@ -1,0 +1,6 @@
+begin check_book 567
+begin add_book 567 Kenneth 40
+begin check_book 567
+commit t1
+commit t2
+commit t3

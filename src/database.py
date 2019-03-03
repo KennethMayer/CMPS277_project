@@ -42,7 +42,7 @@ class CachingDatabaseWrapper:
         self.read_set: Set[str] = set()
 
     def write(self, name: str, val: Any) -> None:
-        print('cwrite: ',name,val)
+        #print('cwrite: ',name,val)
         self.copies[name] = val
 
     def read(self, name: str) -> Any:

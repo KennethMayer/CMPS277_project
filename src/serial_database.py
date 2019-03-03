@@ -13,8 +13,8 @@ class SerialTransactionExecutor:
         self.txn = txn
         self.start_tn = self.db._get_tnc()
 
-    def read_phase(self) -> None:
-        self.txn(self.cached_db)
+    def read_phase(self):
+        return self.txn(self.cached_db)
 
     def validate_and_write_phase(self) -> bool:
         finish_tn = self.db._get_tnc()

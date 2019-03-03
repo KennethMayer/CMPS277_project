@@ -20,7 +20,7 @@ class transaction_manager:
 			"begin": self.begin,
 			"commit": self.commit,
 			"abort": self.abort,
-			"check_book": self.check_book
+			#"check_book": self.check_book
 		}
 		
 	# run a command and return the result
@@ -65,7 +65,6 @@ class transaction_manager:
 		elif(args[0] == 'remove_book'):
 			if len(args) != 3:
 				return 'remove_book usage: remove_book [ISBN] [caller]'
-
 		else:
 			return 'Error: invalid command'
 
@@ -73,8 +72,8 @@ class transaction_manager:
 		tid = 't' + str(self.i)
 		print('Transaction \'', tid, '\' started.')
 		t = self.db.begin(self.fn.run(args))
-		t.read_phase()	#writing to local cache
 		self.transactions[tid] = t
+		return t.read_phase()	#writing to local cache
 
 	# arg = string transaction_id
 	def commit(self,arg):
@@ -84,13 +83,13 @@ class transaction_manager:
 			#self.transactions[arg[0]].read_phase()
 			status = self.transactions[arg[0]].validate_and_write_phase()
 			if status:
-				print('Transaction ', arg[0], ' successfully comitted')
 				self.transactions.pop(arg[0])
+				return 'Transaction {} successfully comitted'.format(arg[0])
 			else:
-				print('Conflict: unable to commit ', arg[0], ', aborting instead.')
 				self.transactions.pop(arg[0])
+				return 'Conflict: unable to commit {}, aborting instead.'.format(arg[0])
 		else:
-			print('Error: invalid transaction ID')
+			return 'Error: invalid transaction ID'
 
 	# arg = string transaction_id
 	def abort(self, arg):
@@ -98,19 +97,6 @@ class transaction_manager:
 			return 'abort usage: abort [transaction_id]'
 		if arg[0] in self.transactions:
 			self.transactions.pop(arg[0])
-			print('Transaction', arg[0], ' aborted')
+			return 'Transaction {} aborted'.format(arg[0])
 		else:
-			print('Error: invalid transaction ID')
-
-
-        # args = string isbn
-	def check_book(self, args):
-		if len(args) != 1:
-			return 'check_book usage: check_book [ISBN]'
-		else:
-			listings = self.db.read(args[0])
-			if listings != False:
-				return 'Found the following listings: {}'.format(listings)
-			else:
-				return 'Couldn\'t find any listings associated with that ISBN.'
-
+			return 'Error: invalid transaction ID'
