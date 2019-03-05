@@ -18,6 +18,10 @@ class SerialTransactionExecutor:
 
     def validate_and_write_phase(self) -> bool:
         finish_tn = self.db._get_tnc()
+		# to implement the replication layer, we need to call it here.
+		# the replica running here checks (with some byzantine algorithm)
+		# whether there is any conflict with pending txns on other replicas,
+		# the same way it checks for it here.
         for tn in range(self.start_tn + 1, finish_tn + 1):
             cached_db = self.db._get_transaction(tn)
             write_set = cached_db.get_write_set()

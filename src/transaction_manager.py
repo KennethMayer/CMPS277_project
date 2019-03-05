@@ -40,7 +40,7 @@ class transaction_manager:
 	# args = string command
 	def begin(self,args):
 		if len(args) == 0:
-			return'begin usage: begin command'
+			return 'begin usage: begin [command]'
 		# command error checking
 		if(args[0] == 'add_book'):
 			if len(args) != 4:
