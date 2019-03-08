@@ -58,8 +58,8 @@ class Functions:
 
 	# args = string isbn, string owner, int balance
 	def buy_book(self, args):
-		found = False
 		def txn(dab: CachingDatabaseWrapper):
+			found = False
 			listings = dab.read(args[0])
 			if listings != False:
 				# now that we have the vector, we need to check if the specified owner is in it
@@ -79,7 +79,7 @@ class Functions:
 			if (not found):
 				return 'Could not find any listing for book {}.'.format(args[0])
 
-			return txn
+		return txn
 
 	# args = string isbn, string caller
 	def remove_book(self, args):

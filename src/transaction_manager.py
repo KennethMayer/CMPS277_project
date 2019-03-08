@@ -13,12 +13,14 @@ class transaction_manager:
 	# initialize an empty database
 	def __init__(self):
 		self.i = 0
-		self.db = SerialDatabase(); # instance of the serial database object
+		self.db = SerialDatabase() # instance of the serial database object
 		self.fn = Functions()
-		self.transactions = {}; # ordered list of the uncommitted transactions
+		self.transactions = {} # ordered list of the uncommitted transactions
+		self.command_text = {} # same key as transactions, but has the command text
 		self.function_names = {
 			"begin": self.begin,
 			"commit": self.commit,
+			"check_commit": self.check_commit, # asks the database whether the transaction could commit, user doesn't see this
 			"abort": self.abort,
 			#"check_book": self.check_book
 		}
@@ -73,7 +75,8 @@ class transaction_manager:
 		print('Transaction \'', tid, '\' started.')
 		t = self.db.begin(self.fn.run(args))
 		self.transactions[tid] = t
-		return t.read_phase()	#writing to local cache
+		self.command_text[tid] = 'begin ' + self.reduce_list_to_string(args)
+		return t.read_phase() + ' transaction number: {}'.format(tid) #writing to local cache
 
 	# arg = string transaction_id
 	def commit(self,arg):
@@ -81,7 +84,7 @@ class transaction_manager:
 			return 'commit usage: commit [transaction_id]'
 		if arg[0] in self.transactions:
 			#self.transactions[arg[0]].read_phase()
-			status = self.transactions[arg[0]].validate_and_write_phase()
+			status = self.transactions[arg[0]].validate_and_write_phase(True)
 			if status:
 				self.transactions.pop(arg[0])
 				return 'Transaction {} successfully comitted'.format(arg[0])
@@ -90,6 +93,20 @@ class transaction_manager:
 				return 'Conflict: unable to commit {}, aborting instead.'.format(arg[0])
 		else:
 			return 'Error: invalid transaction ID'
+			
+	# arg = string transaction_id
+	def check_commit(self,arg):
+		if len(arg) != 1:
+			return 'commit usage: commit [transaction_id]'
+		if arg[0] in self.transactions:
+			#self.transactions[arg[0]].read_phase()
+			status = self.transactions[arg[0]].validate_and_write_phase(False)
+			if status:
+				return True
+			else:
+				return False
+		else:
+			return False
 
 	# arg = string transaction_id
 	def abort(self, arg):
@@ -100,3 +117,12 @@ class transaction_manager:
 			return 'Transaction {} aborted'.format(arg[0])
 		else:
 			return 'Error: invalid transaction ID'
+	
+	# helper function: takes as input a list of strings and returns a concatenated string with spaces between each element
+	def reduce_list_to_string(self, list):
+		return_string = list[0]
+		for string in list[1:]:
+			return_string += (' ' + string)
+		
+		return return_string
+	
