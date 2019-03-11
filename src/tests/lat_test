@@ -1,0 +1,2 @@
+begin add_book 123 Kenneth 40
+commit t1
